@@ -57,7 +57,7 @@ class TaskListViewController: UITableViewController {
     }
     
     private func fetchData() {
-        let fetchRequest = Task.fetchRequest()
+        let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
         
         do {
             taskList = try context.fetch(fetchRequest)
