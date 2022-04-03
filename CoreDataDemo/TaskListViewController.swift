@@ -24,11 +24,11 @@ class TaskListViewController: UITableViewController {
 
     // MARK: - Private Methods
     private func setupNavigationBar() {
-        title = "Task List"
-        navigationController?.navigationBar.prefersLargeTitles = true
-        
+        guard let navigationBar = navigationController?.navigationBar else { return }
         let navBarAppearance = UINavigationBarAppearance()
-        
+
+        title = "Task List"
+
         navBarAppearance.backgroundColor = UIColor(
             red: 21/255,
             green: 101/255,
@@ -44,10 +44,11 @@ class TaskListViewController: UITableViewController {
             target: self,
             action: #selector(addNewTask)
         )
-        
-        navigationController?.navigationBar.tintColor = .white
-        navigationController?.navigationBar.standardAppearance = navBarAppearance
-        navigationController?.navigationBar.scrollEdgeAppearance = navBarAppearance
+
+        navigationBar.prefersLargeTitles = true
+        navigationBar.tintColor = .white
+        navigationBar.standardAppearance = navBarAppearance
+        navigationBar.scrollEdgeAppearance = navBarAppearance
     }
 
     @objc private func addNewTask() {
