@@ -91,15 +91,9 @@ class TaskListViewController: UITableViewController {
     private func update(_ newTaskName: String) {
         guard let cellIndex = tableView.indexPathForSelectedRow else { return }
 
-        tableView.deselectRow(at: cellIndex, animated: true)
-
-        guard let cell = tableView.cellForRow(at: cellIndex) else { return }
-        var content = cell.defaultContentConfiguration()
-
-        content.text = newTaskName
-        cell.contentConfiguration = content
-
         storageManager.resave(newTaskName, by: cellIndex.row)
+
+        tableView.reloadRows(at: [cellIndex], with: .automatic)
     }
 
     private func delete(_ indexPath: IndexPath)
