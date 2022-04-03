@@ -23,7 +23,7 @@ class StorageManager {
             return container
     }()
 
-    private var context:  NSManagedObjectContext {
+    private var context: NSManagedObjectContext {
         persistentContainer.viewContext
     }
 
@@ -47,7 +47,7 @@ class StorageManager {
 
         task.title = taskName
         taskList.append(task)
-        
+
         saveContext()
     }
 
@@ -57,8 +57,7 @@ class StorageManager {
         saveContext()
     }
 
-    func delete(by index: Int)
-    {
+    func delete(by index: Int) {
         context.delete(taskList[index])
         taskList.remove(at: index)
 

@@ -35,10 +35,10 @@ class TaskListViewController: UITableViewController {
             blue: 192/255,
             alpha: 194/255
         )
-        
+
         navBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
         navBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
-        
+
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
@@ -55,7 +55,7 @@ class TaskListViewController: UITableViewController {
         showAlert(with: "New Task", and: "What do you want to do?", action: save)
     }
 
-    private func showAlert(with title: String, and message: String, action: @escaping (String) -> ()) {
+    private func showAlert(with title: String, and message: String, action: @escaping (String) -> Void) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
             guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
@@ -65,14 +65,11 @@ class TaskListViewController: UITableViewController {
 
         alert.addAction(saveAction)
         alert.addAction(cancelAction)
-        if title == "New Task"
-        {
+        if title == "New Task" {
             alert.addTextField { textField in
                 textField.placeholder = "New Task"
             }
-        }
-        else
-        {
+        } else {
             alert.addTextField { textField in
                 guard let cellIndex = self.tableView.indexPathForSelectedRow?.row else { return }
                 textField.text = self.storageManager.taskList[cellIndex].title
@@ -97,8 +94,7 @@ class TaskListViewController: UITableViewController {
         tableView.reloadRows(at: [cellIndex], with: .automatic)
     }
 
-    private func delete(_ indexPath: IndexPath)
-    {
+    private func delete(_ indexPath: IndexPath) {
         storageManager.delete(by: indexPath.row)
 
         tableView.deleteRows(at: [indexPath], with: .automatic)
