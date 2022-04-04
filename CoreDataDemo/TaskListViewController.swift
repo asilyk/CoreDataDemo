@@ -65,12 +65,10 @@ class TaskListViewController: UITableViewController {
 
         alert.addAction(saveAction)
         alert.addAction(cancelAction)
-        if title == "New Task" {
-            alert.addTextField { textField in
+        alert.addTextField { textField in
+            if title == "New Task" {
                 textField.placeholder = "New Task"
-            }
-        } else {
-            alert.addTextField { textField in
+            } else {
                 guard let cellIndex = self.tableView.indexPathForSelectedRow?.row else { return }
                 textField.text = self.storageManager.taskList[cellIndex].title
             }
