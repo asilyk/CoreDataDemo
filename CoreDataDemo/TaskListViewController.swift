@@ -9,6 +9,7 @@ import UIKit
 
 class TaskListViewController: UITableViewController {
     // MARK: - Private Properties
+    private var taskList: [Task] = []
     private let cellID = "task"
     private let storageManager = StorageManager.shared
 
@@ -19,7 +20,14 @@ class TaskListViewController: UITableViewController {
         view.backgroundColor = .white
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
         setupNavigationBar()
-        storageManager.fetchData()
+        storageManager.fetchData { result in
+            switch result {
+            case .success(let taskList):
+                self.taskList = taskList
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
     }
 
     // MARK: - Private Methods
@@ -69,8 +77,8 @@ class TaskListViewController: UITableViewController {
             if title == "New Task" {
                 textField.placeholder = "New Task"
             } else {
-                guard let cellIndex = self.tableView.indexPathForSelectedRow?.row else { return }
-                textField.text = self.storageManager.taskList[cellIndex].title
+                guard let indexPath = self.tableView.indexPathForSelectedRow?.row else { return }
+                textField.text = self.taskList[indexPath].title
             }
         }
 
@@ -78,23 +86,27 @@ class TaskListViewController: UITableViewController {
     }
 
     private func save(_ taskName: String) {
-        storageManager.save(taskName)
-
-        let cellIndex = IndexPath(row: storageManager.taskList.count - 1, section: 0)
-        tableView.insertRows(at: [cellIndex], with: .automatic)
+        storageManager.save(taskName) { task in
+            taskList.append(task)
+            let indexPath = IndexPath(row: taskList.count - 1, section: 0)
+            tableView.insertRows(at: [indexPath], with: .automatic)
+        }
     }
 
     private func update(_ newTaskName: String) {
-        guard let cellIndex = tableView.indexPathForSelectedRow else { return }
+        guard let indexPath = tableView.indexPathForSelectedRow else { return }
 
-        storageManager.resave(newTaskName, by: cellIndex.row)
+        storageManager.update(taskList[indexPath.row], with: newTaskName)
 
-        tableView.reloadRows(at: [cellIndex], with: .automatic)
+        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 
     private func delete(_ indexPath: IndexPath) {
-        storageManager.delete(by: indexPath.row)
+        let task = taskList[indexPath.row]
 
+        storageManager.delete(task)
+
+        taskList.remove(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .automatic)
     }
 }
@@ -102,12 +114,12 @@ class TaskListViewController: UITableViewController {
 // MARK: - UITableViewDataSource
 extension TaskListViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        storageManager.taskList.count
+        taskList.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
-        let task = storageManager.taskList[indexPath.row]
+        let task = taskList[indexPath.row]
         var content = cell.defaultContentConfiguration()
 
         content.text = task.title

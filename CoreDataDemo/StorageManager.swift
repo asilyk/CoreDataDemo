@@ -10,7 +10,6 @@ import CoreData
 class StorageManager {
     // MARK: - Public Properties
     static let shared = StorageManager()
-    var taskList: [Task] = []
 
     // MARK: - Private Properties
     private var persistentContainer: NSPersistentContainer = {
@@ -31,35 +30,35 @@ class StorageManager {
     private init() {}
 
     // MARK: - Public Methods
-    func fetchData() {
+    func fetchData(completion: (Result<[Task], Error>) -> Void) {
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
 
         do {
-            taskList = try context.fetch(fetchRequest)
+            let taskList = try context.fetch(fetchRequest)
+            completion(.success(taskList))
         } catch let error {
-            print("Failed to fetch data", error)
+            completion(.failure(error))
         }
     }
 
-    func save(_ taskName: String) {
+    func save(_ taskName: String, completion: (Task) -> Void) {
         guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: context) else { return }
         guard let task = NSManagedObject(entity: entityDescription, insertInto: context) as? Task else { return }
 
         task.title = taskName
-        taskList.append(task)
+        completion(task)
 
         saveContext()
     }
 
-    func resave(_ newTaskName: String, by index: Int) {
-        taskList[index].title = newTaskName
+    func update(_ task: Task, with newTaskName: String) {
+        task.title = newTaskName
 
         saveContext()
     }
 
-    func delete(by index: Int) {
-        context.delete(taskList[index])
-        taskList.remove(at: index)
+    func delete(_ task: Task) {
+        context.delete(task)
 
         saveContext()
     }
