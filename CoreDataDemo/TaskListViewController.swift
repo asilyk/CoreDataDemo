@@ -83,7 +83,6 @@ class TaskListViewController: UITableViewController {
         guard let indexPath = tableView.indexPathForSelectedRow else { return }
 
         storageManager.update(taskList[indexPath.row], with: newTaskName)
-
         tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 
@@ -91,7 +90,6 @@ class TaskListViewController: UITableViewController {
         let task = taskList[indexPath.row]
 
         storageManager.delete(task)
-
         taskList.remove(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .automatic)
     }
@@ -136,7 +134,10 @@ extension TaskListViewController {
             guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
             action(task)
         }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive) { _ in
+            guard let indexPath = self.tableView.indexPathForSelectedRow else { return }
+            self.tableView.deselectRow(at: indexPath, animated: true)
+        }
 
         alert.addAction(saveAction)
         alert.addAction(cancelAction)
@@ -146,6 +147,7 @@ extension TaskListViewController {
             } else {
                 guard let indexPath = self.tableView.indexPathForSelectedRow?.row else { return }
                 textField.text = self.taskList[indexPath].title
+                textField.placeholder = self.taskList[indexPath].title
             }
         }
 
