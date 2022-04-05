@@ -11,7 +11,7 @@ class StorageManager {
     // MARK: - Public Properties
     static let shared = StorageManager()
 
-    // MARK: - Private Properties
+    // MARK: - Core Data stack
     private var persistentContainer: NSPersistentContainer = {
             let container = NSPersistentContainer(name: "CoreDataDemo")
             container.loadPersistentStores(completionHandler: { (_, error) in
@@ -42,28 +42,24 @@ class StorageManager {
     }
 
     func save(_ taskName: String, completion: (Task) -> Void) {
-        guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: context) else { return }
-        guard let task = NSManagedObject(entity: entityDescription, insertInto: context) as? Task else { return }
+        let task = Task(context: context)
 
         task.title = taskName
         completion(task)
-
         saveContext()
     }
 
     func update(_ task: Task, with newTaskName: String) {
         task.title = newTaskName
-
         saveContext()
     }
 
     func delete(_ task: Task) {
         context.delete(task)
-
         saveContext()
     }
 
-    // MARK: - Private Methods
+    // MARK: - Core Data Saving support
     private func saveContext() {
         if context.hasChanges {
             do {

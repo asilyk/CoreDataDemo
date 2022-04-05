@@ -17,20 +17,17 @@ class TaskListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .white
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
+        setupView()
         setupNavigationBar()
-        storageManager.fetchData { result in
-            switch result {
-            case .success(let taskList):
-                self.taskList = taskList
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }
+        fetchData()
     }
 
     // MARK: - Private Methods
+    private func setupView() {
+        view.backgroundColor = .white
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
+    }
+
     private func setupNavigationBar() {
         guard let navigationBar = navigationController?.navigationBar else { return }
         let navBarAppearance = UINavigationBarAppearance()
@@ -59,30 +56,19 @@ class TaskListViewController: UITableViewController {
         navigationBar.scrollEdgeAppearance = navBarAppearance
     }
 
-    @objc private func addNewTask() {
-        showAlert(with: "New Task", and: "What do you want to do?", action: save)
-    }
-
-    private func showAlert(with title: String, and message: String, action: @escaping (String) -> Void) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
-            guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
-            action(task)
-        }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
-
-        alert.addAction(saveAction)
-        alert.addAction(cancelAction)
-        alert.addTextField { textField in
-            if title == "New Task" {
-                textField.placeholder = "New Task"
-            } else {
-                guard let indexPath = self.tableView.indexPathForSelectedRow?.row else { return }
-                textField.text = self.taskList[indexPath].title
+    private func fetchData() {
+        storageManager.fetchData { result in
+            switch result {
+            case .success(let taskList):
+                self.taskList = taskList
+            case .failure(let error):
+                print(error.localizedDescription)
             }
         }
+    }
 
-        present(alert, animated: true)
+    @objc private func addNewTask() {
+        showAlert(with: "New Task", and: "What do you want to do?", action: save)
     }
 
     private func save(_ taskName: String) {
@@ -127,7 +113,10 @@ extension TaskListViewController {
 
         return cell
     }
+}
 
+// MARK: - UITableViewDelegate
+extension TaskListViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         showAlert(with: "Update Task", and: "What do you want to do?", action: update)
     }
@@ -136,5 +125,30 @@ extension TaskListViewController {
         guard editingStyle == .delete else { return }
 
         delete(indexPath)
+    }
+}
+
+// MARK: - Alert Controller
+extension TaskListViewController {
+    private func showAlert(with title: String, and message: String, action: @escaping (String) -> Void) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
+            guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
+            action(task)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
+
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+        alert.addTextField { textField in
+            if title == "New Task" {
+                textField.placeholder = "New Task"
+            } else {
+                guard let indexPath = self.tableView.indexPathForSelectedRow?.row else { return }
+                textField.text = self.taskList[indexPath].title
+            }
+        }
+
+        present(alert, animated: true)
     }
 }
