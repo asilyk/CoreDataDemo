@@ -60,7 +60,7 @@ class StorageManager {
     }
 
     // MARK: - Core Data Saving support
-    private func saveContext() {
+    func saveContext() {
         if context.hasChanges {
             do {
                 try context.save()
